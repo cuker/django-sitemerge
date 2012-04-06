@@ -65,9 +65,9 @@ class ContentMerge(models.Model):
         logger = self.prepare_logger()
         try:
             if self.action == 'swap':
-                self.swap_sites()
+                self.swap_sites(logger)
             elif self.action == 'sync':
-                self.sync_sites()
+                self.sync_sites(logger)
         except Exception, exception:
             typ, val, tb = sys.exc_info()
             message = traceback.format_exception_only(typ, val)[0]
@@ -107,7 +107,7 @@ class ContentMerge(models.Model):
         field = self.get_site_field()
         return isinstance(field, models.ManyToManyField)
     
-    def swap_sites(self):
+    def swap_sites(self, logger):
         queryset = self.get_queryset()
         site_field = self.get_site_field()
         
@@ -122,16 +122,22 @@ class ContentMerge(models.Model):
                 manager = getattr(src_only, site_field.name)
                 manager.remove(self.src_site)
                 manager.add(self.dst_site)
+                logger.info('Moved %s from %s to %s' % (entry, self.src_site, self.dst_site))
             
             for entry in dst_only:
                 manager = getattr(dst_only, site_field.name)
                 manager.remove(self.dst_site)
                 manager.add(self.src_site)
+                logger.info('Moved %s from %s to %s' % (entry, self.dst_site, self.src_site))
         else:
-            src_only.update(**{site_field.name: self.dst_site})
-            dst_only.update(**{site_field.name: self.src_site})
+            #TODO log the object ids
+            count = src_only.update(**{site_field.name: self.dst_site})
+            logger.info('Moved %s entries to %s' % (count, self.dst_site))
+            
+            count = dst_only.update(**{site_field.name: self.src_site})
+            logger.info('Moved %s entries to %s' % (count, self.src_site))
     
-    def sync_sites(self):
+    def sync_sites(self, logger):
         #copy src into dst
         queryset = self.get_queryset()
         site_field = self.get_site_field()
@@ -143,6 +149,9 @@ class ContentMerge(models.Model):
             for entry in src_only:
                 manager = getattr(src_only, site_field.name)
                 manager.add(self.dst_site)
+                logger.info('Added %s to %s' % (entry, self.dst_site))
         else:
-            src_only.update(**{site_field.name: self.dst_site})
+            #TODO log the object ids
+            count = src_only.update(**{site_field.name: self.dst_site})
+            logger.info('Moved %s entries to %s' % (count, self.dst_site))
 
