@@ -14,6 +14,9 @@ class ScheduleMergeForm(forms.ModelForm):
         if 'src_site' in self.cleaned_data and 'dst_site' in self.cleaned_data:
             if self.cleaned_data['src_site'] == self.cleaned_data['dst_site']:
                 raise forms.ValidationError('The source site must be different from the destination site')
+        
+        #TODO detect if site_field is needed
+        
         return self.cleaned_data
     
     def save(self, user, queryset, commit=True):
@@ -26,4 +29,4 @@ class ScheduleMergeForm(forms.ModelForm):
     
     class Meta:
         model = ContentMerge
-        fields = ['merge_action', 'src_site', 'dst_site', 'scheduled_timestamp']
+        fields = ['merge_action', 'src_site', 'dst_site', 'site_field', 'scheduled_timestamp']

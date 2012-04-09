@@ -31,6 +31,7 @@ class ContentMerge(models.Model):
     scheduled_by = models.ForeignKey(User, blank=True, null=True)
     content_type = models.ForeignKey(ContentType)
     object_ids = models.TextField(blank=True, help_text='JSON encoded list of ids')
+    site_field = models.CharField(blank=True, max_length=32)
     log = models.TextField(blank=True)
     
     src_site = models.ForeignKey(Site, verbose_name='source site', related_name='contentmerge_sources')
@@ -94,12 +95,15 @@ class ContentMerge(models.Model):
     
     def get_queryset(self):
         model = self.content_type.model_class()
-        object_ids = json.loads(self.objects_ids)
+        object_ids = json.loads(self.object_ids)
         qs = model.objects.filter(pk__in=object_ids)
         return qs
     
     def get_site_field(self):
         model = self.content_type.model_class()
+        if self.site_field:
+            return model._meta.get_field(self.site_field)
+        
         for field in model._meta.fields:
             if getattr(field, 'related', None):
                 if field.related.parent_model == Site:

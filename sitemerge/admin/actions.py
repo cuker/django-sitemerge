@@ -10,6 +10,7 @@ def schedule_merge(modeladmin, request, queryset):
         
         if form.is_valid():
             content_merge = form.save(request.user, queryset)
+            content_merge.schedule_merge()
             #send message
             message = '%s item(s) scheduled for merging' % queryset.count()
             messages.add_message(request, messages.SUCCESS, message)
