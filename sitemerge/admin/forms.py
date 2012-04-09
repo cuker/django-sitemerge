@@ -26,4 +26,4 @@ class ScheduleMergeForm(forms.ModelForm):
     
     class Meta:
         model = ContentMerge
-        fields = ['action', 'src_site', 'dst_site', 'scheduled_timestamp']
+        fields = ['merge_action', 'src_site', 'dst_site', 'scheduled_timestamp']

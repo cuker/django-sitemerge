@@ -24,13 +24,13 @@ STATUS_CHOICES = [('pending', 'Pending'),
                   ('complete', 'Complete'),]
 
 class ContentMerge(models.Model):
-    action = models.CharField(choices=MERGE_ACTIONS, max_length=5)
+    merge_action = models.CharField(choices=MERGE_ACTIONS, max_length=5)
     status = models.CharField(choices=STATUS_CHOICES, max_length=10, default='pending')
     scheduled_timestamp = models.DateTimeField(null=True, blank=True)
     completion_timestamp = models.DateTimeField(null=True, blank=True)
     scheduled_by = models.ForeignKey(User, blank=True, null=True)
     content_type = models.ForeignKey(ContentType)
-    object_ids = models.TextField(blank=True) #json encoded list of ids
+    object_ids = models.TextField(blank=True, help_text='JSON encoded list of ids')
     log = models.TextField(blank=True)
     
     src_site = models.ForeignKey(Site, verbose_name='source site', related_name='contentmerge_sources')
@@ -39,6 +39,8 @@ class ContentMerge(models.Model):
     task_id = models.CharField(max_length=128, blank=True)
     
     def schedule_merge(self, immediate=False):
+        if self.task_id:
+            pass #TODO cancel task
         self.status = 'pending'
         self.completion_timestamp = None
         self.save()
@@ -64,9 +66,9 @@ class ContentMerge(models.Model):
     def execute_merge(self):
         logger = self.prepare_logger()
         try:
-            if self.action == 'swap':
+            if self.merge_action == 'swap':
                 self.swap_sites(logger)
-            elif self.action == 'sync':
+            elif self.merge_action == 'sync':
                 self.sync_sites(logger)
         except Exception, exception:
             typ, val, tb = sys.exc_info()
