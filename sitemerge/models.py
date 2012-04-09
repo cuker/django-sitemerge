@@ -125,13 +125,13 @@ class ContentMerge(models.Model):
             dst_only = dst_only.exclude(**{site_field.name: self.src_site})
             #TODO ideally do an update on the m2m table
             for entry in src_only:
-                manager = getattr(src_only, site_field.name)
+                manager = getattr(entry, site_field.name)
                 manager.remove(self.src_site)
                 manager.add(self.dst_site)
                 logger.info('Moved %s from %s to %s' % (entry, self.src_site, self.dst_site))
             
             for entry in dst_only:
-                manager = getattr(dst_only, site_field.name)
+                manager = getattr(entry, site_field.name)
                 manager.remove(self.dst_site)
                 manager.add(self.src_site)
                 logger.info('Moved %s from %s to %s' % (entry, self.dst_site, self.src_site))
@@ -153,7 +153,7 @@ class ContentMerge(models.Model):
         if self.is_m2m():
             src_only = src_only.exclude(**{site_field.name: self.dst_site})
             for entry in src_only:
-                manager = getattr(src_only, site_field.name)
+                manager = getattr(entry, site_field.name)
                 manager.add(self.dst_site)
                 logger.info('Added %s to %s' % (entry, self.dst_site))
         else:
