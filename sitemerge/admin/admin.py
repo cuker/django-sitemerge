@@ -7,6 +7,17 @@ class ContentMergeAdmin(admin.ModelAdmin):
     list_display = ('status', 'content_type', 'merge_action', 'completion_timestamp')
     list_filter = ('status', 'content_type', 'merge_action', 'completion_timestamp')
     actions = ['execute_merge', 'schedule_merge']
+    readonly_fields = ['log', 'task_id', 'completion_timestamp']
+    
+    fieldsets = (
+        (None, {
+            'fields': ('merge_action', 'status', 'scheduled_timestamp', 'scheduled_by', 'content_type', 'site_field', 'src_site', 'dst_site', 'log', 'task_id', 'completion_timestamp')
+        }),
+        ('Advanced options', {
+            'classes': ('collapse',),
+            'fields': ('object_ids',)
+        }),
+    )
     
     def execute_merge(self, request, queryset):
         count = 0

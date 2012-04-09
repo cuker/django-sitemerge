@@ -30,7 +30,7 @@ class ContentMerge(models.Model):
     completion_timestamp = models.DateTimeField(null=True, blank=True)
     scheduled_by = models.ForeignKey(User, blank=True, null=True)
     content_type = models.ForeignKey(ContentType)
-    object_ids = models.TextField(blank=True, help_text='JSON encoded list of ids')
+    object_ids = models.TextField(blank=True, help_text='JSON encoded query kwargs') #TODO advanced
     site_field = models.CharField(blank=True, max_length=32)
     log = models.TextField(blank=True)
     
@@ -91,12 +91,12 @@ class ContentMerge(models.Model):
         model = queryset.model
         self.content_type = ContentType.objects.get_for_model(model)
         object_ids = list(queryset.values_list('pk', flat=True))
-        self.object_ids = json.dumps(object_ids)
+        self.object_ids = json.dumps({'pk__in':object_ids})
     
     def get_queryset(self):
         model = self.content_type.model_class()
-        object_ids = json.loads(self.object_ids)
-        qs = model.objects.filter(pk__in=object_ids)
+        params = json.loads(self.object_ids)
+        qs = model.objects.filter(**params)
         return qs
     
     def get_site_field(self):
