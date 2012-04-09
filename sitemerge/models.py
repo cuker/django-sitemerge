@@ -89,7 +89,7 @@ class ContentMerge(models.Model):
     def set_queryset(self, queryset):
         model = queryset.model
         self.content_type = ContentType.objects.get_for_model(model)
-        object_ids = queryset.values_list('pk', flat=True)
+        object_ids = list(queryset.values_list('pk', flat=True))
         self.object_ids = json.dumps(object_ids)
     
     def get_queryset(self):
