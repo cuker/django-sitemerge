@@ -7,7 +7,7 @@ class ScheduleMergeForm(forms.ModelForm):
     #for admin actions
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
     action = forms.CharField(widget=forms.MultipleHiddenInput)
-    select_across = forms.IntegerField(widget=forms.MultipleHiddenInput, required=False)
+    select_across = forms.CharField(widget=forms.MultipleHiddenInput, required=False)
     #TODO scheduled_timestamp gets admin datetime widget
     scheduled_timestamp = forms.DateTimeField(widget=widgets.AdminSplitDateTime, required=False)
     
