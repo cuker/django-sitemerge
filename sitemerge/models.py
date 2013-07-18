@@ -2,7 +2,7 @@ from django.db import models, transaction
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
-from django.utils import simplejson as json
+import json
 
 from signals import content_merge_executed
 
