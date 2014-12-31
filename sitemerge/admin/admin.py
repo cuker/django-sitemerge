@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 
-from sitemerge.models import ContentMerge
+from sitemerge.models import ContentMerge, SiteMergeProfile
 
 class ContentMergeAdmin(admin.ModelAdmin):
     list_display = ('status', 'content_type', 'merge_action', 'completion_timestamp')
@@ -36,4 +36,18 @@ class ContentMergeAdmin(admin.ModelAdmin):
     schedule_merge.short_description = _('Schedule Merge')
 
 admin.site.register(ContentMerge, ContentMergeAdmin)
+
+class SiteMergeProfileAdmin(admin.ModelAdmin):
+    readonly_fields = ['status', 'log', 'task_id', 'completion_timestamp']
+    fieldsets = (
+        (None, {
+            'fields': ('merge_action', 'status', 'scheduled_timestamp', 'content_type', 'site_field', 'src_site', 'dst_site', 'log', 'task_id', 'completion_timestamp')
+        }),
+        ('Advanced options', {
+            'classes': ('collapse',),
+            'fields': ('object_ids',)
+        }),
+     )
+
+admin.site.register(SiteMergeProfile, SiteMergeProfileAdmin)
 

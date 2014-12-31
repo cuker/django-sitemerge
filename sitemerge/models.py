@@ -23,6 +23,37 @@ STATUS_CHOICES = [('pending', 'Pending'),
                   ('error', 'Error'),
                   ('complete', 'Complete'),]
 
+class SiteMergeProfile(models.Model):
+    name = models.CharField(max_length=255)
+    merge_action = models.CharField(choices=MERGE_ACTIONS, max_length=5)
+    status = models.CharField(choices=STATUS_CHOICES, max_length=10, default='pending')
+    scheduled_timestamp = models.DateTimeField(null=True, blank=True)
+    completion_timestamp = models.DateTimeField(null=True, blank=True)
+    scheduled_by = models.ForeignKey(User, blank=True, null=True)
+    content_type = models.ManyToManyField(ContentType)
+    object_ids = models.TextField(blank=True, help_text='JSON encoded query kwargs') #TODO advanced
+    site_field = models.CharField(blank=True, max_length=32)
+    log = models.TextField(blank=True)
+    src_site = models.ForeignKey(Site, verbose_name='source site', related_name='sitemergeprofile_sources')
+    dst_site = models.ForeignKey(Site, verbose_name='destination site', related_name='sitemergeprofile_destinations')
+    task_id = models.CharField(max_length=128, blank=True)
+    
+    def save(self, force_insert=False, force_update=False, using=None):
+        result = super(SiteMergeProfile,self).save(force_insert=force_insert, force_update=force_update, using=using)
+#         batch, created = ContentMergeBatch.objects.get_or_create(site_merge_profile=self)
+        
+        return result
+
+    def schedule_merge(self, immediate=False):
+        pass
+
+    @transaction.commit_on_success
+    def execute_merge(self):
+        pass
+    
+class ContentMergeBatch(models.Model):
+    site_merge_profile = models.ForeignKey(SiteMergeProfile)
+
 class ContentMerge(models.Model):
     merge_action = models.CharField(choices=MERGE_ACTIONS, max_length=5)
     status = models.CharField(choices=STATUS_CHOICES, max_length=10, default='pending')
@@ -33,6 +64,8 @@ class ContentMerge(models.Model):
     object_ids = models.TextField(blank=True, help_text='JSON encoded query kwargs') #TODO advanced
     site_field = models.CharField(blank=True, max_length=32)
     log = models.TextField(blank=True)
+    
+    batch = models.ForeignKey(ContentMergeBatch, blank=True, null=True)
     
     src_site = models.ForeignKey(Site, verbose_name='source site', related_name='contentmerge_sources')
     dst_site = models.ForeignKey(Site, verbose_name='destination site', related_name='contentmerge_destinations')
