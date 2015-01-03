@@ -38,18 +38,37 @@ class SiteMergeProfile(models.Model):
     dst_site = models.ForeignKey(Site, verbose_name='destination site', related_name='sitemergeprofile_destinations')
     task_id = models.CharField(max_length=128, blank=True)
     
-    def save(self, force_insert=False, force_update=False, using=None):
-        result = super(SiteMergeProfile,self).save(force_insert=force_insert, force_update=force_update, using=using)
-#         batch, created = ContentMergeBatch.objects.get_or_create(site_merge_profile=self)
-        
-        return result
+    def __unicode__(self):
+        return self.name
+    
+    def create_or_update_content_merge(self):
+        batch, created = ContentMergeBatch.objects.get_or_create(site_merge_profile=self)
+        for content_type in self.content_type.all():
+            try:
+                content_merge = ContentMerge.objects.get(batch=batch, content_type=content_type)
+            except ContentMerge.DoesNotExist:
+                content_merge = ContentMerge(batch=batch, content_type=content_type)
+            content_merge.merge_action = self.merge_action
+            content_merge.scheduled_timestamp = self.scheduled_timestamp
+            content_merge.completion_timestamp = self.completion_timestamp
+            content_merge.site_field = self.site_field
+            content_merge.src_site = self.src_site
+            content_merge.dst_site = self.dst_site
+            content_merge.task_id = self.task_id
+            content_merge.save()
+        content_type_id_list = [ct.id for ct in self.content_type.all()]
+        ContentMerge.objects.filter(batch=batch).exclude(content_type__id__in=content_type_id_list).delete()
 
     def schedule_merge(self, immediate=False):
-        pass
+        for batch in self.contentmergebatch_set.all():
+            for content_merge in batch.contentmerge_set.all():
+                content_merge.schedule_merge(immediate)
 
     @transaction.commit_on_success
     def execute_merge(self):
-        pass
+        for batch in self.contentmergebatch_set.all():
+            for content_merge in batch.contentmerge_set.all():
+                content_merge.execute_merge()
     
 class ContentMergeBatch(models.Model):
     site_merge_profile = models.ForeignKey(SiteMergeProfile)
@@ -128,7 +147,9 @@ class ContentMerge(models.Model):
     
     def get_queryset(self):
         model = self.content_type.model_class()
-        params = json.loads(self.object_ids)
+        params = {}
+        if self.object_ids:
+            params = json.loads(self.object_ids)
         qs = model.objects.filter(**params)
         return qs
     
