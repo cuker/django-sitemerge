@@ -1,11 +1,10 @@
 from sitemerge.models import ContentMerge, SiteMergeProfile, ContentMergeBatch
 
-from django import forms
 from django.contrib import admin
-from django.utils.translation import ugettext_lazy as _
-from django.forms.models import ModelForm, ModelMultipleChoiceField
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.contrib.contenttypes.models import ContentType
+from django.forms.models import ModelForm, ModelMultipleChoiceField
+from django.utils.translation import ugettext_lazy as _
 
 
 class ContentMergeAdmin(admin.ModelAdmin):
@@ -45,11 +44,11 @@ admin.site.register(ContentMerge, ContentMergeAdmin)
 class ContentTypeChoiceField(ModelMultipleChoiceField):
     def __init__(self, *args, **kwargs):
         kwargs["widget"] = FilteredSelectMultiple("Person", False)
-        super(ContentTypeChoiceField, self).__init__( *args, **kwargs)
+        super(ContentTypeChoiceField, self).__init__(*args, **kwargs)
         
     
     def label_from_instance(self, obj):
-        return "%s (%s)"%(obj.name, obj.app_label)
+        return "%s (%s)" % (obj.name, obj.app_label)
     
 class EditForm(ModelForm):
     content_type = ContentTypeChoiceField([""])
@@ -58,9 +57,9 @@ class EditForm(ModelForm):
         model = SiteMergeProfile
         
     def __init__(self, *args, **kwargs):
-        super(EditForm, self).__init__( *args, **kwargs)
+        super(EditForm, self).__init__(*args, **kwargs)
         # NOTE this will only apply to m2ms called "sites", not single FKs like in Redirects
-        valid_model_ids = [ct.id for ct in ContentType.objects.all().order_by("model") if hasattr(ct.model_class(),"sites")]
+        valid_model_ids = [ct.id for ct in ContentType.objects.all().order_by("model") if hasattr(ct.model_class(), "sites")]
         self.fields['content_type'].queryset = ContentType.objects.filter(id__in=valid_model_ids).order_by("name")
 
 class SiteMergeProfileAdmin(admin.ModelAdmin):
@@ -93,7 +92,7 @@ class SiteMergeProfileAdmin(admin.ModelAdmin):
         self.message_user(request, "%s content merges(s) scheduled for loading." % count)
     schedule_merge.short_description = _('Schedule Merge')
 
-    def create_or_update_content_merge(self, request ,queryset):
+    def create_or_update_content_merge(self, request , queryset):
         count = 0
         for obj in queryset:
             obj.create_or_update_content_merge()
