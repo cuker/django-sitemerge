@@ -8,6 +8,7 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        return
         # Adding model 'ContentMerge'
         db.create_table('sitemerge_contentmerge', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -28,6 +29,7 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
+        return
         # Deleting model 'ContentMerge'
         db.delete_table('sitemerge_contentmerge')
 
