@@ -64,7 +64,7 @@ class EditForm(ModelForm):
 
 class SiteMergeProfileAdmin(admin.ModelAdmin):
     form = EditForm
-    readonly_fields = ['status', 'log', 'task_id', 'completion_timestamp']
+    readonly_fields = ['site_field', 'status', 'log', 'task_id', 'completion_timestamp']
     fieldsets = (
         (None, {
             'fields': ('name', 'merge_action', 'status', 'scheduled_timestamp', 'content_type', 'site_field', 'src_site', 'dst_site', 'log', 'task_id', 'completion_timestamp')

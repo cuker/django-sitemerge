@@ -32,7 +32,7 @@ class SiteMergeProfile(models.Model):
     scheduled_by = models.ForeignKey(User, blank=True, null=True)
     content_type = models.ManyToManyField(ContentType)
     object_ids = models.TextField(blank=True, help_text='JSON encoded query kwargs') #TODO advanced
-    site_field = models.CharField(blank=True, max_length=32)
+    site_field = models.CharField(default="sites", blank=True, max_length=32)
     log = models.TextField(blank=True)
     src_site = models.ForeignKey(Site, verbose_name='source site', related_name='sitemergeprofile_sources')
     dst_site = models.ForeignKey(Site, verbose_name='destination site', related_name='sitemergeprofile_destinations')
