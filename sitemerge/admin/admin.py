@@ -64,45 +64,24 @@ class EditForm(ModelForm):
 
 class SiteMergeProfileAdmin(admin.ModelAdmin):
     form = EditForm
-    readonly_fields = ['site_field', 'status', 'log', 'task_id', 'completion_timestamp']
-    fieldsets = (
-        (None, {
-            'fields': ('name', 'merge_action', 'status', 'scheduled_timestamp', 'content_type', 'site_field', 'src_site', 'dst_site', 'log', 'task_id', 'completion_timestamp')
-        }),
-        ('Advanced options', {
-            'classes': ('collapse',),
-            'fields': ('object_ids',)
-        }),
-     )
-    actions = ['create_or_update_content_merge', 'execute_merge', 'schedule_merge']
+    actions = ['create_batch', 'create_and_run_batch']
     
-    def execute_merge(self, request, queryset):
-        count = 0
-        for obj in queryset:
-            obj.schedule_merge(immediate=True)
-            count += 1
-        self.message_user(request, "%s content merges(s) queued for loading." % count)
-    execute_merge.short_description = _('Execute Merge')
+    def create_and_run_batch(self, request, queryset):
+        self.create_batch(request, queryset, run=True)
+        self.message_user(request, ("Running created batch(es)"))
     
-    def schedule_merge(self, request, queryset):
-        count = 0
+    def create_batch(self, request, queryset, run=False):
         for obj in queryset:
-            obj.schedule_merge()
-            count += 1
-        self.message_user(request, "%s content merges(s) scheduled for loading." % count)
-    schedule_merge.short_description = _('Schedule Merge')
-
-    def create_or_update_content_merge(self, request , queryset):
-        count = 0
-        for obj in queryset:
-            obj.create_or_update_content_merge()
-            count += 1
-        if count > 0:
-            self.message_user(request, "Content Merge created")
-        else:
-            self.message_user(request, "Please select a ContentMergePorfile")
-    create_or_update_content_merge.short_description = _('Create or update ContentMerge')
+            obj.create_batch(user=request.user, run=run)
+        self.message_user(request, ("Batch for %s created" % obj))
 
 admin.site.register(SiteMergeProfile, SiteMergeProfileAdmin)
 
-admin.site.register(ContentMergeBatch)
+class ContentMergeBatchAdmin(admin.ModelAdmin):
+    actions = ['run']
+    
+    def run(self, request, queryset):
+        for obj in queryset:
+            obj.run()
+            self.message_user(request, ("Running %s" % obj))
+admin.site.register(ContentMergeBatch,ContentMergeBatchAdmin)
