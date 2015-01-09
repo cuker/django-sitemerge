@@ -1,0 +1,29 @@
+{% extends "admin/change_form.html" %}
+
+{% block content %}
+	{{ block.super }}
+
+	<table style="width:100%">
+	    <thead>
+	        <tr>
+	        	<th>Status</th>
+	            <th>Merge action</th>
+	            <th>Content type</th>
+	            <th>Schedule by</th>
+	            <th>Completion time</th>
+	        </tr>
+	    </thead>
+	    <tbody>
+			{% for content_merge in original.contentmerge_set.all %}
+		        <tr>
+		            <td>{{ content_merge.status }}</td>
+		            <td>{{ content_merge.merge_action }}</td>
+		            <td>{{ content_merge.content_type }}</td>
+		            <td>{{ content_merge.scheduled_by }}</td>
+		            <td>{{ content_merge.completion_timestamp }}</td>
+		        </tr>
+			{% endfor %}
+	    </tbody>
+	</table>
+
+{% endblock %}
