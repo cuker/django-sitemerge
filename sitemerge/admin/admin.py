@@ -79,6 +79,7 @@ admin.site.register(SiteMergeProfile, SiteMergeProfileAdmin)
 
 class ContentMergeBatchAdmin(admin.ModelAdmin):
     actions = ['run']
+    readonly_fields = ['created_by']
     
     def run(self, request, queryset):
         for obj in queryset:
